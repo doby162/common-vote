@@ -1,14 +1,24 @@
 (defpackage #:common-vote
-  (:use :cl)
+  (:use :cl);Why yes I WOULD like to use common lisp
   (:export :main)
-  (:export :vote)
+  (:export :cast-votes);I am being very verbose today
+  (:export :count-votes)
   (:export :test));these parens are tricky
-(in-package :common-vote)
+(in-package :common-vote);if something doesn't work, declare the package!
 
 ;global vars would go here
+(defparameter *random-color* sdl:*white*);used by test-sdl
+(defvar *ballet*);the list of things you can vote on, possibly including a screenshot
 
-(defparameter *random-color* sdl:*white*)
-(defun mouse-rect-2d ()
+(defun configure-ballet ()
+	;so this needs to be command linem I think. but right now it's a dummy function anyway
+	(format t "this function will save a ballet configuration to ~/vote/ballet.lisp. If you are useing multiple vote stations, please copy this file between all of them."))
+
+(defun test (); any tests should go here, and be run to make sure a new pi is working
+	(format t "~%~a~%" (test-load))
+	(test-sdl))
+
+(defun test-sdl ()
   (sdl:with-init ()
     (sdl:window 200 200 :title-caption "Move a rectangle using the mouse")
     (setf (sdl:frame-rate) 60)
@@ -32,19 +42,10 @@
        ;; Redraw the display
        (sdl:update-display)))))
 
-(defun test ()
+(defun test-load ();I might change this to testing if the database loaded
 	(format t "common-vote has been quickloaded"))
 
-(defun display-alien ()
-	(sdl:with-init ()
-	  (sdl:window 320 240)
-	  (sdl:draw-surface (sdl:LOAD-IMAGE "~/lisp.bmp" :IMAGE-TYPE :BMP :FORCE T))
-	  (sdl:update-display)
-	    (sdl:with-events ()
-	      (:quit-event () t)
-	      (:video-expose-event (sdl:update-display)))))
-
-(defun vote()
+(defun cast-votes()
 	(sdl:with-init (sdl:sdl-init-video)
     (sdl:initialise-default-font)
     (sdl:window *screen-width* *screen-height*
@@ -101,8 +102,9 @@
 
 
 
-
-
+(test);automated testing!
+;consider putting a graphical prompt to check if you would like to cast or count?
+;interesting. format doesn't output anything when called this way
 
 
 
