@@ -2,9 +2,10 @@
   (:use :cl);Why yes I WOULD like to use common lisp
   (:export :cast-votes);TODO
   (:export :count-votes);TODO
-  (:export :configure-ballet);IN PROGRESS
-  (:export :print-ballet);TODO
-  (:export :test));DONE
+  (:export :clear-ballet);done
+  (:export :configure-ballet);done
+  (:export :print-ballet);done
+  (:export :test));done
 (in-package :common-vote);if something doesn't work, declare the package!
 
 ;global vars would go here
@@ -13,31 +14,35 @@
 
 (defun configure-ballet ()
 ;loop through prompt-for-ballet untill user is satisfied, either adding to or relacing existing config depending on params
-(let (overwrite)
-	(if (y-or-n-p "This function will write to .voterc. Would you like tp append(y) or replace(n)?") (setf overwrite nil) (setf overwrite t))
-
 	(loop (push (prompt-for-ballet) *ballet*)
 	 (if (not (y-or-n-p "Another? [y/n]: ")) (return)))
 
 	(print-ballet)
-	(save-ballet overwrite)
-))
+	(save-ballet))
+
 (defun print-ballet ()
 ;dump the contents of the ballet for inspection
   (dolist (cd *ballet*)
     (format t "~{~a:~10t~a~%~}~%" cd)))
-(defun save-ballet(overwrite)
+(defun save-ballet()
 ;saves the ballet to disk. RIght now that means ~/quicklisp/local-projects/common-vote/.voterc
-	(if overwrite (with-open-file (out "~/quicklisp/local-projects/common-vote/.voterc"
+	(with-open-file (out "~/quicklisp/local-projects/common-vote/.voterc"
                    :direction :output
                    :if-exists :supersede)
     (with-standard-io-syntax
-      (print *ballet* out))) (format t "nilish"))
+      (print *ballet* out)))
 
 )
 (defun load-ballet ()
 ;load the existing ballet config from disk
-)
+  (with-open-file (in "~/quicklisp/local-projects/common-vote/.voterc") ;:if-does-not-exist :create this is giving me problems
+    (with-standard-io-syntax
+      (setf *ballet* (read in)))))
+
+(defun clear-ballet ()
+	(setf *ballet* "")
+	(format t "ballet cleared. Please record a new one or re-load the existing one"))
+
 (defun prompt-for-ballet ()
 ;specific prompt questions for a single ballet entry
   (list
@@ -95,7 +100,7 @@
 
 
 
-
+(load-ballet);we probably always want to load this file if it exists
 (test);automated testing!
 ;consider putting a graphical prompt to check if you would like to cast or count?
 ;interesting. format doesn't output anything when called this way
