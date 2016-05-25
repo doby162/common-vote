@@ -93,20 +93,22 @@
 ;output text if loading of this file has worked
 	(format t "common-vote has been quickloaded"))
 
-(defun mouse ()
-	(format t "IT WORKED I THINK"));interestingly, this only outputs once the sdl loop finishes. I think a different format recipe could fix that
+(defun mouse (button)
+(let ((button2 55))
+	(format t "IT WORKED I THINK~%")
+	(format t "~a~%" button2)
+	(format T "~a~%" button)));interestingly, this only outputs once the sdl loop finishes. I think a different format recipe could fix that
 
 (defun cast-votes()
 ;display clicky UI and record votes to a file
-
 (sdl:with-init ()
 	(sdl:window 200 200 :title-caption "Common-Vote")
 	(setf (sdl:frame-rate) 30)
 
 	(sdl:with-events ()
 		(:quit-event () t)
-		(:mouse-button-down-event()
-			(mouse)); this is the part that matters, it should run this function when I click
+		(:mouse-button-down-event(:BUTTON button)
+			(mouse button)); this is the part that matters, it should run this function when I click
 		(:idle ()
        ;; Change the color of the box if the left mouse button is depressed
        (when (sdl:mouse-left-p)
