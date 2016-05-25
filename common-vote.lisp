@@ -35,9 +35,9 @@
 )
 (defun load-ballet ()
 ;load the existing ballet config from disk
-  (with-open-file (in "~/quicklisp/local-projects/common-vote/.voterc") ;:if-does-not-exist :create this is giving me problems
+  (with-open-file (in "~/quicklisp/local-projects/common-vote/.voterc" :if-does-not-exist :create)
     (with-standard-io-syntax
-      (setf *ballet* (read in)))))
+      (setf *ballet* (read in nil)))))
 
 (defun clear-ballet ()
 	(setf *ballet* "")
