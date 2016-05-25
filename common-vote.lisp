@@ -93,9 +93,34 @@
 ;output text if loading of this file has worked
 	(format t "common-vote has been quickloaded"))
 
+(defun mouse ()
+	(format t "IT WORKED I THINK"));interestingly, this only outputs once the sdl loop finishes. I think a different format recipe could fix that
+
 (defun cast-votes()
 ;display clicky UI and record votes to a file
-)
+
+(sdl:with-init ()
+	(sdl:window 200 200 :title-caption "Common-Vote")
+	(setf (sdl:frame-rate) 30)
+
+	(sdl:with-events ()
+		(:quit-event () t)
+		(:mouse-button-down-event()
+			(mouse)); this is the part that matters, it should run this function when I click
+		(:idle ()
+       ;; Change the color of the box if the left mouse button is depressed
+       (when (sdl:mouse-left-p)
+         (setf *random-color* (sdl:color :r (random 255) :g (random 255) :b (random 255))))
+
+       ;; Clear the display each game loop
+       (sdl:clear-display sdl:*black*)
+
+       ;; Draw the box having a center at the mouse x/y coordinates.
+       (sdl:draw-box (sdl:rectangle-from-midpoint-* (sdl:mouse-x) (sdl:mouse-y) 20 20)
+                     :color *random-color*)
+
+       ;; Redraw the display
+       (sdl:update-display)))))
 
 
 
