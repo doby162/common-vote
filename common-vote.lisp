@@ -83,11 +83,13 @@
 	(pack vote-1 :side :top)
 	(pack vote-1-button :side :top)
 	(pack vote-1-text :side :bottom)
+	(add);call an empty function that can have content added to it
 ))
 
 (defun play () 
 	(start-wish)
 	(gui))
+(defun add () );empty function to be redefined at run time
 
 (defun cast-votes ()
 	(with-ltk ()
