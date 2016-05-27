@@ -18,8 +18,13 @@ please note that these instructions and source code areintended for rasperry pi 
 
 
 
+sudo apt-get install libqt4-dev libsmokeqtgui4-3 libsmokeqt4-dev    <very important
+
+ sudo apt-get install cmake
+ sudo apt-get install g++
 
 
+as things stand the instal proceedure is going to turn out to be irrelevent. Weather I send out a binary or source, it seems to work with the default install of raspbian
 
 TODO:
 

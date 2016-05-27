@@ -4,6 +4,6 @@
   :maintainer "Michael <doby162@gmail.com>"
   :author "Michael <doby162@gmail.com>"
   :licence "undecided"
-  :depends-on (lispbuilder-sdl)
+  :depends-on (:ltk)
   :serial t
   :components ((:file "common-vote")))

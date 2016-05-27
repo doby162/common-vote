@@ -1,5 +1,6 @@
 (defpackage #:common-vote
-  (:use :cl);Why yes I WOULD like to use common lisp
+  (:use :cl)
+  (:use :ltk)
   (:export :cast-votes);TODO
   (:export :count-votes);TODO
   (:export :clear-ballet);done
@@ -9,14 +10,12 @@
 (in-package :common-vote);if something doesn't work, declare the package!
 
 ;global vars would go here
-(defparameter *random-color* sdl:*white*);used by test-sdl
 (defvar *ballet* nil);the list of things you can vote on, possibly including a screenshot
 
 (defun configure-ballet ()
 ;loop through prompt-for-ballet untill user is satisfied, either adding to or relacing existing config depending on params
 	(loop (push (prompt-for-ballet) *ballet*)
 	 (if (not (y-or-n-p "Another? [y/n]: ")) (return)))
-
 	(print-ballet)
 	(save-ballet))
 
@@ -24,15 +23,15 @@
 ;dump the contents of the ballet for inspection
   (dolist (cd *ballet*)
     (format t "~{~a:~10t~a~%~}~%" cd)))
+
 (defun save-ballet()
 ;saves the ballet to disk. RIght now that means ~/quicklisp/local-projects/common-vote/.voterc
 	(with-open-file (out "~/quicklisp/local-projects/common-vote/.voterc"
                    :direction :output
                    :if-exists :supersede)
     (with-standard-io-syntax
-      (print *ballet* out)))
+      (print *ballet* out))))
 
-)
 (defun load-ballet ()
 ;load the existing ballet config from disk
   (with-open-file (in "~/quicklisp/local-projects/common-vote/.voterc" :if-does-not-exist :create)
@@ -63,73 +62,33 @@
 
 (defun test (); any tests should go here, and be run to make sure a new pi is working
 	(format t "~%~a~%" (test-load))
-	(test-sdl))
-
-(defun test-sdl ()
-  (sdl:with-init ()
-    (sdl:window 200 200 :title-caption "Move a rectangle using the mouse")
-    (setf (sdl:frame-rate) 60)
-
-    (sdl:with-events ()
-      (:quit-event () t)
-      (:key-down-event ()
-       (sdl:push-quit-event))
-      (:idle ()
-       ;; Change the color of the box if the left mouse button is depressed
-       (when (sdl:mouse-left-p)
-         (setf *random-color* (sdl:color :r (random 255) :g (random 255) :b (random 255))))
-
-       ;; Clear the display each game loop
-       (sdl:clear-display sdl:*black*)
-
-       ;; Draw the box having a center at the mouse x/y coordinates.
-       (sdl:draw-box (sdl:rectangle-from-midpoint-* (sdl:mouse-x) (sdl:mouse-y) 20 20)
-                     :color *random-color*)
-
-       ;; Redraw the display
-       (sdl:update-display)))))
+	(ltk::ltk-eyes))
 
 (defun test-load ()
 ;output text if loading of this file has worked
 	(format t "common-vote has been quickloaded"))
+;end ballet twiddling
+;begin gui operations
 
-(defun mouse (button)
-(let ((button2 55))
-	(format t "IT WORKED I THINK~%")
-	(format t "~a~%" button2)
-	(format T "~a~%" button)));interestingly, this only outputs once the sdl loop finishes. I think a different format recipe could fix that
+(defun cast-votes ()
+	(with-ltk ()
+		(let* ((top-frame (make-instance `frame))
+			(left-frame (make-instance `frame :master top-frame))
+			(right-frame (make-instance `frame :master top-frame))
+			(vote-1 (make-instance `frame :master left-frame))
+			(vote-1-button (make-instance `button :master vote-1 :text "vote4me" :command (lambda () (format t "voted for one~%"))))
+			(vote-1-text (make-instance `button :master vote-1 :text "describe stuff")))
+		(pack top-frame)
+		(pack left-frame  :side :left )
+		(pack right-frame :side :right)
+		(pack vote-1 :side :top)
+		(pack vote-1-button :side :top)
+		(pack vote-1-text :side :bottom)
+)))
+			
+		
 
-(defun cast-votes()
-;display clicky UI and record votes to a file
-(sdl:with-init ()
-	(sdl:window 200 200 :title-caption "Common-Vote")
-	(setf (sdl:frame-rate) 30)
-
-	(sdl:with-events ()
-		(:quit-event () t)
-		(:mouse-button-down-event(:BUTTON button)
-			(mouse button)); this is the part that matters, it should run this function when I click
-		(:idle ()
-       ;; Change the color of the box if the left mouse button is depressed
-       (when (sdl:mouse-left-p)
-         (setf *random-color* (sdl:color :r (random 255) :g (random 255) :b (random 255))))
-
-       ;; Clear the display each game loop
-       (sdl:clear-display sdl:*black*)
-
-       ;; Draw the box having a center at the mouse x/y coordinates.
-       (sdl:draw-box (sdl:rectangle-from-midpoint-* (sdl:mouse-x) (sdl:mouse-y) 20 20)
-                     :color *random-color*)
-
-       ;; Redraw the display
-       (sdl:update-display)))))
-
-
-
-
+;here we have the startup proceedure
 (load-ballet);we probably always want to load this file if it exists
 (test);automated testing!
 ;consider putting a graphical prompt to check if you would like to cast or count?
-;interesting. format doesn't output anything when called this way
-
-
