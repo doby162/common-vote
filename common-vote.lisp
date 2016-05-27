@@ -70,21 +70,28 @@
 ;end ballet twiddling
 ;begin gui operations
 
+(defun gui ()
+	(let* ((top-frame (make-instance `frame))
+		(left-frame (make-instance `frame :master top-frame))
+		(right-frame (make-instance `frame :master top-frame))
+		(vote-1 (make-instance `frame :master left-frame))
+		(vote-1-button (make-instance `button :master vote-1 :text "vote4me" :command (lambda () (format t "voted for one~%"))))
+		(vote-1-text (make-instance `button :master vote-1 :text "describe stuff")))
+	(pack top-frame)
+	(pack left-frame  :side :left )
+	(pack right-frame :side :right)
+	(pack vote-1 :side :top)
+	(pack vote-1-button :side :top)
+	(pack vote-1-text :side :bottom)
+))
+
+(defun play () 
+	(start-wish)
+	(gui))
+
 (defun cast-votes ()
 	(with-ltk ()
-		(let* ((top-frame (make-instance `frame))
-			(left-frame (make-instance `frame :master top-frame))
-			(right-frame (make-instance `frame :master top-frame))
-			(vote-1 (make-instance `frame :master left-frame))
-			(vote-1-button (make-instance `button :master vote-1 :text "vote4me" :command (lambda () (format t "voted for one~%"))))
-			(vote-1-text (make-instance `button :master vote-1 :text "describe stuff")))
-		(pack top-frame)
-		(pack left-frame  :side :left )
-		(pack right-frame :side :right)
-		(pack vote-1 :side :top)
-		(pack vote-1-button :side :top)
-		(pack vote-1-text :side :bottom)
-)))
+		(gui)))
 			
 		
 
