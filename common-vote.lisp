@@ -86,7 +86,7 @@
 	(pack vote-1-button :side :top)
 	(pack vote-1-text :side :bottom)
     (image-load vote-1-image "~/screenshots/flustercluck.gif")
-    (let ((canvas (make-instance `canvas)))
+    (let ((canvas (make-instance `canvas :width 80 :height 50)))
         (create-image canvas 0 0 :image vote-1-image)
 	(pack canvas :side :bottom))
 	(add);call an empty function that can have content added to it
