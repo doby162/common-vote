@@ -76,6 +76,8 @@
 		(right-frame (make-instance `frame :master top-frame))
 		(vote-1 (make-instance `frame :master left-frame))
 		(vote-1-button (make-instance `button :master vote-1 :text "vote4me" :command (lambda () (format t "voted for one~%"))))
+		(vote-1-image (make-image))
+;		(vote-1-canvas (make-instance `canvas :master vote-1))
 		(vote-1-text (make-instance `label :master vote-1 :text "describe stuff")))
 	(pack top-frame)
 	(pack left-frame  :side :left )
@@ -83,6 +85,10 @@
 	(pack vote-1 :side :top)
 	(pack vote-1-button :side :top)
 	(pack vote-1-text :side :bottom)
+    (image-load vote-1-image "~/screenshots/flustercluck.gif")
+    (let ((canvas (make-instance `canvas)))
+        (create-image canvas 0 0 :image vote-1-image)
+	(pack canvas :side :bottom))
 	(add);call an empty function that can have content added to it
 ))
 
