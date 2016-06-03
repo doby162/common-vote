@@ -8,7 +8,8 @@
   (:export :print-ballet);done
   (:export :test));done
 (in-package :common-vote);if something doesn't work, declare the package!
-
+;this particular macro should go in dorian utils
+(defmacro doc (function) `(documentation ,function `function))
 ;global vars would go here
 (defvar *ballet* nil);the list of things you can vote on, possibly including a screenshot
 (defvar *votes* ())
@@ -16,7 +17,7 @@
                              "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
 
 (defun configure-ballet ()
-;loop through prompt-for-ballet untill user is satisfied, either adding to or relacing existing config depending on params
+"loop through prompt-for-ballet untill user is satisfied, either adding to or relacing existing config depending on params"
 	(loop (push (prompt-for-ballet) *ballet*)
 	 (if (not (y-or-n-p "Another? [y/n]: ")) (return)))
 	(print-ballet)
