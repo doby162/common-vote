@@ -11,6 +11,9 @@
 
 ;global vars would go here
 (defvar *ballet* nil);the list of things you can vote on, possibly including a screenshot
+(defvar *votes* ())
+(defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
+                             "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
 
 (defun configure-ballet ()
 ;loop through prompt-for-ballet untill user is satisfied, either adding to or relacing existing config depending on params
@@ -74,20 +77,22 @@
 	(let* ((top-frame (make-instance `frame))
 		(left-frame (make-instance `frame :master top-frame))
 		(right-frame (make-instance `frame :master top-frame))
+        (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*))))
         (instructions (make-instance `label :master right-frame :text "this is a detailed explaination of voting")))
 	(pack top-frame)
 	(pack left-frame  :side :left )
+	(pack undo-vote :side :top)
 	(pack instructions :side :top)
 	(pack right-frame :side :right)
     (dolist (entry *ballet*)
-      (gui-entry entry left-frame))
+      (gui-entry entry left-frame right-frame))
 	(add);call an empty function that can have content added to it
 ))
 
-(defun gui-entry (entry master)
-	(let* ((top-frame (make-instance `frame))
-		(top (make-instance `frame :master master))
-		(button (make-instance `button :master top :text (getf entry :name) :command (lambda () (format t "voted for ~a~%" (getf entry :team-name)))))
+(defun gui-entry (entry master right)
+	(let* ((top (make-instance `frame :master master))
+		(button (make-instance `button :master top :text (getf entry :name) :command
+                               (lambda () (record-vote (getf entry :team-name) right))))
 		(image (make-image))
 		(canvas (make-instance `canvas :width 80 :height 50 :master top))
 		(text (make-instance `label :master top :text (getf entry :description))))
@@ -97,8 +102,13 @@
     (image-load image (getf entry :path-to-screenshot))
     (create-image canvas 0 0 :image image)
 	(pack canvas :side :bottom)
-
 ))
+(defun record-vote (team master)
+  (unless (eq *votes* (pushnew team *votes*))
+      (let ((vote-indicator (make-instance `label :master master :text (car *votes*))))
+        (pack vote-indicator :side :bottom)))
+  (format t "~%The current tally is:")
+  (dolist (vote *votes*) (format t "~a~%" vote)))
 
 (defun play () 
 	(start-wish)
