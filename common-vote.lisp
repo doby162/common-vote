@@ -37,15 +37,26 @@
 		       :if-exists :supersede)
     (with-standard-io-syntax
       (print *ballet* out))))
+(defun save-tally();I might want to make these save functions into a generic one
+  (with-open-file (out "~/quicklisp/local-projects/common-vote/tally"
+		       :direction :output
+		       :if-exists :supersede)
+    (with-standard-io-syntax
+      (print *master-tally* out))))
 
 (defun load-ballet ()
   ;load the existing ballet config from disk
   (with-open-file (in "~/quicklisp/local-projects/common-vote/.voterc" :if-does-not-exist :create)
     (with-standard-io-syntax
-      (setf *ballet* (read in nil)))))
+      (setf *ballet* (read in nil))))
+  (with-open-file (in "~/quicklisp/local-projects/common-vote/tally" :if-does-not-exist :create)
+    (with-standard-io-syntax
+      (setf *master-tally* (read in nil))))
+)
 
 (defun clear-ballet ()
   (setf *ballet* "")
+  (setf *master-tally* ());it doesn't make sense to keep votes for a deleted ballet
   (format t "ballet cleared. Please record a new one or re-load the existing one"))
 
 (defun prompt-for-ballet ()
@@ -82,7 +93,7 @@
 	 (right-frame (make-instance `frame :master top-frame))
 	 (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
 	 (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
-                                 (lambda () (push *votes* *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) )))
+                                 (lambda () (push *votes* *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally))))
 	 (instructions (make-instance `label :master right-frame :text "this is a detailed explaination of voting")))
     (pack top-frame)
     (pack left-frame  :side :left )
