@@ -14,6 +14,7 @@
 (defvar *ballet* nil);the list of things you can vote on, possibly including a screenshot
 (defvar *votes* ())
 (defvar *labels* ())
+(defvar *master-tally* ())
 (defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
 			     "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
 
@@ -80,10 +81,13 @@
 	 (left-frame (make-instance `frame :master top-frame))
 	 (right-frame (make-instance `frame :master top-frame))
 	 (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
+	 (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
+                                 (lambda () (push *votes* *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) )))
 	 (instructions (make-instance `label :master right-frame :text "this is a detailed explaination of voting")))
     (pack top-frame)
     (pack left-frame  :side :left )
     (pack undo-vote :side :top)
+    (pack commit-vote :side :top)
     (pack instructions :side :top)
     (pack right-frame :side :right)
     (dolist (entry *ballet*)
