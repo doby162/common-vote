@@ -106,7 +106,7 @@
     ))
 (defun record-vote (team master)
   (unless (eq *votes* (pushnew team *votes*))
-    (let ((vote-indicator (make-instance `label :master master :text (car *votes*))))
+    (let ((vote-indicator (make-instance `label :master master :text (format nil "~a vote is for ~a~%" (nth (- (length *votes*) 1) *number-words*) (car *votes*)))))
       (pack vote-indicator :side :bottom)))
   (format t "~%The current tally is:")
   (dolist (vote *votes*) (format t "~a~%" vote)))
