@@ -13,6 +13,7 @@
 ;global vars would go here
 (defvar *ballet* nil);the list of things you can vote on, possibly including a screenshot
 (defvar *votes* ())
+(defvar *labels* ())
 (defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
 			     "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
 
@@ -78,7 +79,7 @@
   (let* ((top-frame (make-instance `frame))
 	 (left-frame (make-instance `frame :master top-frame))
 	 (right-frame (make-instance `frame :master top-frame))
-	 (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*))))
+	 (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
 	 (instructions (make-instance `label :master right-frame :text "this is a detailed explaination of voting")))
     (pack top-frame)
     (pack left-frame  :side :left )
@@ -104,10 +105,11 @@
     (create-image canvas 0 0 :image image)
     (pack canvas :side :bottom)
     ))
+
 (defun record-vote (team master)
   (unless (eq *votes* (pushnew team *votes*))
     (let ((vote-indicator (make-instance `label :master master :text (format nil "~a vote is for ~a~%" (nth (- (length *votes*) 1) *number-words*) (car *votes*)))))
-      (pack vote-indicator :side :bottom)))
+      (pack vote-indicator :side :bottom)(push vote-indicator *labels*)))
   (format t "~%The current tally is:")
   (dolist (vote *votes*) (format t "~a~%" vote)))
 
