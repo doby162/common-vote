@@ -3,40 +3,56 @@
   (:use :ltk)
   (:export :cast-votes);TODO
   (:export :count-votes);TODO
-  (:export :clear-ballet);done
-  (:export :configure-ballet);done
-  (:export :print-ballet);done
-  (:export :test));done
+  (:export :clear-ballot);done
+  (:export :configure-ballot);done
+  (:export :print-ballot);done
+  (:export :test));done cross compile? built in test framework
 (in-package :common-vote);if something doesn't work, declare the package!
 ;this particular macro should go in dorian utils
 (defmacro doc (function) `(documentation ,function `function))
 ;global vars would go here
-(defvar *ballet* nil);the list of things you can vote on, possibly including a screenshot
+(defvar *ballot* nil);the list of things you can vote on, possibly including a screenshot
 (defvar *votes* ())
 (defvar *labels* ())
 (defvar *master-tally* ())
 (defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
 			     "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
+(defvar *canidates* ()) 
+(defvar *results* ())
+(defvar *tmp* ())
+(defun count-votes (&optional how-many-winners) 
+  (setf *results* ())
+  (dolist (q *ballot*) (pushnew (getf q :team-name) *canidates*))
+  ;
+  (dolist (w *canidates*)
+    (setf *tmp* ())
+    (dolist (q *master-tally*) 
+      ;      (format t "this is a test ~a ~a~%" (car q) w)
+      (when (equalp (car q) w) (format t "~a~a~%" (car q) w) (push (car q) *tmp*)))
+    (push w *tmp*)
+    (push (reverse *tmp*) *results*))
+  (sort *results* #'(lambda (a b) (> (list-length a) (list-length b))))
+  )
 
-(defun configure-ballet ()
-  "loop through prompt-for-ballet untill user is satisfied, either adding to or relacing existing config depending on params"
-  (loop (push (prompt-for-ballet) *ballet*)
+(defun configure-ballot ()
+  "loop through prompt-for-ballot untill user is satisfied, either adding to or relacing existing config depending on params"
+  (loop (push (prompt-for-ballot) *ballot*)
 	(if (not (y-or-n-p "Another? [y/n]: ")) (return)))
-  (print-ballet)
-  (save-ballet))
+  (print-ballot)
+  (save-ballot))
 
-(defun print-ballet ()
-  ;dump the contents of the ballet for inspection
-  (dolist (cd *ballet*)
+(defun print-ballot ()
+  ;dump the contents of the ballot for inspection
+  (dolist (cd *ballot*)
     (format t "~{~a:~10t~a~%~}~%" cd)))
 
-(defun save-ballet()
-  ;saves the ballet to disk. RIght now that means ~/quicklisp/local-projects/common-vote/.voterc
+(defun save-ballot()
+  ;saves the ballot to disk. RIght now that means ~/quicklisp/local-projects/common-vote/.voterc
   (with-open-file (out "~/quicklisp/local-projects/common-vote/.voterc"
 		       :direction :output
 		       :if-exists :supersede)
     (with-standard-io-syntax
-      (print *ballet* out))))
+      (print *ballot* out))))
 (defun save-tally();I might want to make these save functions into a generic one
   (with-open-file (out "~/quicklisp/local-projects/common-vote/tally"
 		       :direction :output
@@ -44,23 +60,23 @@
     (with-standard-io-syntax
       (print *master-tally* out))))
 
-(defun load-ballet ()
-  ;load the existing ballet config from disk
+(defun load-ballot ()
+  ;load the existing ballot config from disk
   (with-open-file (in "~/quicklisp/local-projects/common-vote/.voterc" :if-does-not-exist :create)
     (with-standard-io-syntax
-      (setf *ballet* (read in nil))))
+      (setf *ballot* (read in nil))))
   (with-open-file (in "~/quicklisp/local-projects/common-vote/tally" :if-does-not-exist :create)
     (with-standard-io-syntax
       (setf *master-tally* (read in nil))))
 )
 
-(defun clear-ballet ()
-  (setf *ballet* "")
-  (setf *master-tally* ());it doesn't make sense to keep votes for a deleted ballet
-  (format t "ballet cleared. Please record a new one or re-load the existing one"))
+(defun clear-ballot ()
+  (setf *ballot* "")
+  (setf *master-tally* ());it doesn't make sense to keep votes for a deleted ballot
+  (format t "ballot cleared. Please record a new one or re-load the existing one"))
 
-(defun prompt-for-ballet ()
-  ;specific prompt questions for a single ballet entry
+(defun prompt-for-ballot ()
+  ;specific prompt questions for a single ballot entry
   (list
     :Name
     (prompt-read "Name")
@@ -84,7 +100,7 @@
 (defun test-load ()
   ;output text if loading of this file has worked
   (format t "common-vote has been quickloaded"))
-;end ballet twiddling
+;end ballot twiddling
 ;begin gui operations
 
 (defun gui ()
@@ -93,7 +109,7 @@
 	 (right-frame (make-instance `frame :master top-frame))
 	 (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
 	 (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
-                                 (lambda () (push *votes* *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally))))
+                                 (lambda () (push (reverse *votes*) *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally))))
 	 (instructions (make-instance `label :master right-frame :text "this is a detailed explaination of voting")))
     (pack top-frame)
     (pack left-frame  :side :left )
@@ -101,7 +117,7 @@
     (pack commit-vote :side :top)
     (pack instructions :side :top)
     (pack right-frame :side :right)
-    (dolist (entry *ballet*)
+    (dolist (entry *ballot*)
       (gui-entry entry left-frame right-frame))
     (add);call an empty function that can have content added to it
     ))
@@ -138,6 +154,6 @@
 	    (gui)))
 
 ;here we have the startup proceedure
-(load-ballet);we probably always want to load this file if it exists
-(test);automated testing!
+(load-ballot);we probably always want to load this file if it exists
+;(test);automated testing!
 ;consider putting a graphical prompt to check if you would like to cast or count?
