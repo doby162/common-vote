@@ -1,3 +1,4 @@
+(push :TK8.4 *features*)
 (defpackage #:common-vote
   (:use :cl)
   (:use :ltk)
@@ -16,28 +17,31 @@
 (defvar *labels* ())
 (defvar *master-tally* ())
 (defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
-			     "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
+                             "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
 (defvar *canidates* ()) 
 (defvar *results* ())
 (defvar *tmp* ())
 (defun count-votes (&optional how-many-winners) 
   (setf *results* ())
   (dolist (q *ballot*) (pushnew (getf q :team-name) *canidates*))
-  ;
   (dolist (w *canidates*)
     (setf *tmp* ())
     (dolist (q *master-tally*) 
-      ;      (format t "this is a test ~a ~a~%" (car q) w)
-      (when (equalp (car q) w) (format t "~a~a~%" (car q) w) (push (car q) *tmp*)))
+      (when (equalp (car q) w) (push (car q) *tmp*)))
     (push w *tmp*)
     (push (reverse *tmp*) *results*))
-  (sort *results* #'(lambda (a b) (> (list-length a) (list-length b))))
+  (sort *results* #'(lambda (a b) (> (list-length a) (list-length b))))(display-winner))
+
+(defun display-winner () 
+  (format t "The winner is: ~a With ~a votes! ~%" (car (car *results*)) (- (list-length (car *results*)) 1))
+  (format t "All contestants in order: ~%")
+  (dolist (r *results*) (format t "~a with ~a votes~%" (car r) (- (list-length r) 1)))
   )
 
 (defun configure-ballot ()
   "loop through prompt-for-ballot untill user is satisfied, either adding to or relacing existing config depending on params"
   (loop (push (prompt-for-ballot) *ballot*)
-	(if (not (y-or-n-p "Another? [y/n]: ")) (return)))
+        (if (not (y-or-n-p "Another? [y/n]: ")) (return)))
   (print-ballot)
   (save-ballot))
 
@@ -49,14 +53,14 @@
 (defun save-ballot()
   ;saves the ballot to disk. RIght now that means ~/quicklisp/local-projects/common-vote/.voterc
   (with-open-file (out "~/quicklisp/local-projects/common-vote/.voterc"
-		       :direction :output
-		       :if-exists :supersede)
+                       :direction :output
+                       :if-exists :supersede)
     (with-standard-io-syntax
       (print *ballot* out))))
 (defun save-tally();I might want to make these save functions into a generic one
   (with-open-file (out "~/quicklisp/local-projects/common-vote/tally"
-		       :direction :output
-		       :if-exists :supersede)
+                       :direction :output
+                       :if-exists :supersede)
     (with-standard-io-syntax
       (print *master-tally* out))))
 
@@ -68,7 +72,7 @@
   (with-open-file (in "~/quicklisp/local-projects/common-vote/tally" :if-does-not-exist :create)
     (with-standard-io-syntax
       (setf *master-tally* (read in nil))))
-)
+  )
 
 (defun clear-ballot ()
   (setf *ballot* "")
@@ -104,13 +108,16 @@
 ;begin gui operations
 
 (defun gui ()
+  (font-create "herb" :size 50)
   (let* ((top-frame (make-instance `frame))
-	 (left-frame (make-instance `frame :master top-frame))
-	 (right-frame (make-instance `frame :master top-frame))
-	 (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
-	 (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
-                                 (lambda () (push (reverse *votes*) *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally))))
-	 (instructions (make-instance `label :master right-frame :text "this is a detailed explaination of voting")))
+         ;         (herb (font-create "herb"
+         ;         (name &key family size weight slant underline overstrike)
+         (left-frame (make-instance `frame :master top-frame))
+         (right-frame (make-instance `frame :master top-frame))
+         (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
+         (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
+                                     (lambda () (push (reverse *votes*) *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally))))
+         (instructions (make-instance `label :master right-frame :text "this is a detailed explaination of voting")))
     (pack top-frame)
     (pack left-frame  :side :left )
     (pack undo-vote :side :top)
@@ -124,11 +131,11 @@
 
 (defun gui-entry (entry master right)
   (let* ((top (make-instance `frame :master master))
-	 (button (make-instance `button :master top :text (getf entry :name) :command
-				(lambda () (record-vote (getf entry :team-name) right))))
-	 (image (make-image))
-	 (canvas (make-instance `canvas :width 80 :height 50 :master top))
-	 (text (make-instance `label :master top :text (getf entry :description))))
+         (button (make-instance `button :master top :text (getf entry :name) :command
+                                (lambda () (record-vote (getf entry :team-name) right))))
+         (image (make-image))
+         (canvas (make-instance `canvas :width 80 :height 50 :master top))
+         (text (make-instance `label :font "Helvetica 10 bold" :master top :text (getf entry :description))))
     (pack top :side :bottom)
     (pack button :side :top)
     (pack text :side :bottom)
@@ -151,7 +158,7 @@
 
 (defun cast-votes ()
   (with-ltk ()
-	    (gui)))
+            (gui)))
 
 ;here we have the startup proceedure
 (load-ballot);we probably always want to load this file if it exists
