@@ -21,6 +21,7 @@
 (defvar *canidates* ()) 
 (defvar *results* ())
 (defvar *tmp* ())
+(defvar *low* ())
 (defun count-votes (&optional how-many-winners) 
   (setf *results* ())
   (dolist (q *ballot*) (pushnew (getf q :team-name) *canidates*))
@@ -30,13 +31,20 @@
       (when (equalp (car q) w) (push (car q) *tmp*)))
     (push w *tmp*)
     (push (reverse *tmp*) *results*))
-  (sort *results* #'(lambda (a b) (> (list-length a) (list-length b))))(display-winner))
+  (sort *results* #'(lambda (a b) (> (list-length a) (list-length b)))) (setf *low* (last *results*)) (display-winner))
+
+(defun eliminate ()
+  (when (>= (- (list-length (first *results*)) 1) (/ (list-length *master-tally*) 2))
+    (display-winner)
+    (return-from eliminate 0))
+  (let ((x (car (car (last *results*))))) 
+;    (dolist (y *master-tally*) (when (equalp (first y) x) (format t "~a~%" y) (pop y) (format t "~a~%" y)))))
+    (dotimes (i (list-length *master-tally*)) (when (equalp (first (nth i *master-tally*)) x) (pop (nth i *master-tally*))))))
 
 (defun display-winner () 
   (format t "The winner is: ~a With ~a votes! ~%" (car (car *results*)) (- (list-length (car *results*)) 1))
   (format t "All contestants in order: ~%")
-  (dolist (r *results*) (format t "~a with ~a votes~%" (car r) (- (list-length r) 1)))
-  )
+  (dolist (r *results*) (format t "~a with ~a votes~%" (car r) (- (list-length r) 1))))
 
 (defun configure-ballot ()
   "loop through prompt-for-ballot untill user is satisfied, either adding to or relacing existing config depending on params"
