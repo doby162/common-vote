@@ -2,8 +2,10 @@
 (defpackage #:common-vote
   (:use :cl)
   (:use :ltk)
-  (:export :cast-votes);TODO
-  (:export :count-votes);TODO
+  (:use :sb-ext)
+  (:export :help);
+  (:export :cast-votes);
+  (:export :count-votes);
   (:export :clear-ballot);done
   (:export :configure-ballot);done
   (:export :print-ballot);done
@@ -22,7 +24,19 @@
 (defvar *results* ())
 (defvar *tmp* ())
 (defvar *low* ())
+(defun main ()
+  (help)
+  (loop (print (eval (read))))
+  (sb-ext:exit))
+
+(defun help() 
+  (format t "Hello! This help function provides an overveiw of how to use common vote for your raspberry pi voting booth.~%")
+  (format t "To get more data on a specific function, type (doc `name-of-function)~%")
+  (format t "The functions for setup include: configure-ballot, print-ballot, clear-ballot, test, help~%")
+  (format t "The functions for casting and counting votes include: cast-votes, count-votes~%")
+  (format t "when you are done, typpe exit to close this program. Or just close the window it's in, doesn't matter to me.~%"))
 (defun count-votes (&optional how-many-winners) 
+  "counts votes. Note that this function does not modify any files, so a recount can be done by re-starting this code"
   (setf *results* ())
   (dolist (q *ballot*) (pushnew (getf q :team-name) *canidates*))
   (dolist (w *canidates*)
@@ -47,14 +61,14 @@
   (dolist (r *results*) (format t "~a with ~a votes~%" (car r) (- (list-length r) 1))))
 
 (defun configure-ballot ()
-  "loop through prompt-for-ballot untill user is satisfied, either adding to or relacing existing config depending on params"
+  "loop through a prompt until all entires are entered. This adds to the existing ballot and saves. Also see: clear-ballot"
   (loop (push (prompt-for-ballot) *ballot*)
         (if (not (y-or-n-p "Another? [y/n]: ")) (return)))
   (print-ballot)
   (save-ballot))
 
 (defun print-ballot ()
-  ;dump the contents of the ballot for inspection
+  "dump the contents of the ballot for inspection"
   (dolist (cd *ballot*)
     (format t "~{~a:~10t~a~%~}~%" cd)))
 
@@ -73,7 +87,7 @@
       (print *master-tally* out))))
 
 (defun load-ballot ()
-  ;load the existing ballot config from disk
+  "load the existing ballot config from disk"
   (with-open-file (in "~/quicklisp/local-projects/common-vote/.voterc" :if-does-not-exist :create)
     (with-standard-io-syntax
       (setf *ballot* (read in nil))))
@@ -83,6 +97,7 @@
   )
 
 (defun clear-ballot ()
+  "clears the ballot for configure-ballot. does not overwrite ballot on disk unless used with configure-ballot"
   (setf *ballot* "")
   (setf *master-tally* ());it doesn't make sense to keep votes for a deleted ballot
   (format t "ballot cleared. Please record a new one or re-load the existing one"))
@@ -106,6 +121,7 @@
   (read-line *query-io*))
 
 (defun test (); any tests should go here, and be run to make sure a new pi is working
+  "tests some things"
   (format t "~%~a~%" (test-load))
   (ltk::ltk-eyes))
 
@@ -165,6 +181,7 @@
 (defun add () );empty function to be redefined at run time
 
 (defun cast-votes ()
+  "launches the graphical user interface and records votes. This adds to the existing vote count, the vote count is reset by configure-ballot"
   (with-ltk ()
             (gui)))
 
@@ -172,3 +189,4 @@
 (load-ballot);we probably always want to load this file if it exists
 ;(test);automated testing!
 ;consider putting a graphical prompt to check if you would like to cast or count?
+;(main)
