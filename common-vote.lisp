@@ -31,7 +31,7 @@
       (when (equalp (car q) w) (push (car q) *tmp*)))
     (push w *tmp*)
     (push (reverse *tmp*) *results*))
-  (sort *results* #'(lambda (a b) (> (list-length a) (list-length b)))) (setf *low* (last *results*)) (display-winner))
+  (sort *results* #'(lambda (a b) (> (list-length a) (list-length b)))) (setf *low* (last *results*)) (eliminate))
 
 (defun eliminate ()
   (when (>= (- (list-length (first *results*)) 1) (/ (list-length *master-tally*) 2))
@@ -39,7 +39,7 @@
     (return-from eliminate 0))
   (let ((x (car (car (last *results*))))) 
 ;    (dolist (y *master-tally*) (when (equalp (first y) x) (format t "~a~%" y) (pop y) (format t "~a~%" y)))))
-    (dotimes (i (list-length *master-tally*)) (when (equalp (first (nth i *master-tally*)) x) (pop (nth i *master-tally*))))))
+    (dotimes (i (list-length *master-tally*)) (when (equalp (first (nth i *master-tally*)) x) (pop (nth i *master-tally*))))) (count-votes))
 
 (defun display-winner () 
   (format t "The winner is: ~a With ~a votes! ~%" (car (car *results*)) (- (list-length (car *results*)) 1))
