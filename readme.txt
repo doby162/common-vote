@@ -12,30 +12,18 @@ install quicklisp, remembering to add to init file
 
 navigate to quicklisp/local-projects, and clone the project from github
 
-sbcl --eval "(ql:quickload :common-vote)
+to launch the program type:
+sbcl --eval "(ql:quickload :common-vote) or
+sbcl --eval "(progn (asdf:operate \`asdf:load-op \`common-vote) (in-package :common-vote))" (prefered)
 
 please note that these instructions and source code areintended for rasperry pi 2. The original pi might work if you used armel, but I can't be sure of that currently. Honestly, any platform that can run steel bank common lisp in a graphical environment should be fine.
 
 
+usage: Currently the weak points are the ui being a little meh, and the fact that some files have to be manually combined in order to use the results from multiple voting booths, but those shoul be taken care of soon.
 
-sudo apt-get install libqt4-dev libsmokeqtgui4-3 libsmokeqt4-dev    <very important
+to view ussage information while the program in running, type (help) or (common-vote:help)
+to configure the .voterc file, type (configure-ballot) (or common-vote:configure-ballot) and follow the prompts
 
- sudo apt-get install cmake
- sudo apt-get install g++
+to then run the graphical portion, type (cast-votes) and to count all votes currently loaded into the current vote-machine type (count-votes)
+currently, the algorithm only gives first place with accuracy, and only lists the next place as a way of checking for ties.
 
-
-as things stand the instal proceedure is going to turn out to be irrelevent. Weather I send out a binary or source, it seems to work with the default install of raspbian
-
-TODO:
-
-Ok, so currently I am aiming ot get this finished and uploaded by june 15th. By then, the folowing features need to be implemented:
-
-users need to be able to easily specify what teams will be on the ballet. Either with a command line interface or a dot file. An arbitrary number of teams will be supported
-	screen shots included?
-	If there are screen shots the application might need to be able to scroll to allow them all.
-
-The list of teams needs to be graphically represented and clickable
-
-Votes must be saved in a format which is lisp-parsable and appendable, easily. Plist probably
-
-Votes must be sorted with arbitrary parameters, such as number of winners
