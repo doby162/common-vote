@@ -32,9 +32,9 @@
 (defun help() 
   (format t "Hello! This help function provides an overveiw of how to use common vote for your raspberry pi voting booth.~%")
   (format t "To get more data on a specific function, type (doc `name-of-function)~%")
-  (format t "The functions for setup include: configure-ballot, print-ballot, clear-ballot, test, help~%")
+  (format t "The functions for setup include: configure-ballot, print-ballot, clear-ballot, test, help, and incorporate~%")
   (format t "The functions for casting and counting votes include: cast-votes, count-votes~%")
-  (format t "when you are done, typpe exit to close this program. Or just close the window it's in, doesn't matter to me.~%"))
+  (format t "when you are done, type exit to close this program. Or just close the window it's in, doesn't matter to me.~%"))
 (defun count-votes (&optional how-many-winners) 
   "counts votes. Note that this function does not modify any files, so a recount can be done by re-starting this code"
   (setf *results* ())
@@ -95,6 +95,14 @@
     (with-standard-io-syntax
       (setf *master-tally* (read in nil))))
   )
+(defun incorporate (path)
+  "Loads an additional tally file, given a file name, and adds it to the existing one without changing the file"
+  (with-open-file (in path :if-does-not-exist nil)
+    (with-standard-io-syntax
+      (setf *aux* (read in nil))))
+  (when (not *aux*) (format t "Failed to load file"))
+  (dolist (item *aux*) (push  (pop *aux*) *master-tally*))
+  (setf *aux* nil))
 
 (defun clear-ballot ()
   "clears the ballot for configure-ballot. does not overwrite ballot on disk unless used with configure-ballot"
