@@ -156,10 +156,13 @@
     (pack commit-vote :side :top)
     (pack instructions :side :top)
     (pack right-frame :side :right)
-    (dolist (entry *ballot*)
-      (gui-entry entry left-frame right-frame))
-    (add);call an empty function that can have content added to it
-    ))
+    (let ((len (list-length *ballot*)) (i 0))
+      (dotimes (loops (ceiling (/ len 10)))
+        (let ((iframe (make-instance `frame :master left-frame)))
+          (dotimes (i 10) 
+            (when (> (list-length *ballot*) (+ i (* 10 loops)))
+              (gui-entry (nth (+ i (* 10 loops)) *ballot*) iframe right-frame))
+              (pack iframe :side :right)))))))
 
 (defun gui-entry (entry master right)
   (let* ((top (make-instance `frame :master master))
