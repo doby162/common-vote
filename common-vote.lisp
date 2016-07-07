@@ -1,4 +1,3 @@
-(push :TK8.4 *features*)
 (defpackage #:common-vote
   (:use :cl)
   (:use :ltk)
@@ -139,7 +138,7 @@
   (format t "common-vote has been quickloaded"))
 ;end ballot twiddling
 ;begin gui operations
-(defun shuff (lis) (sort lis #'(lambda (x y) (eq 1 (random 2)))))
+(defun shuff (lis) (sort lis #'(lambda (x y) (eq 1 (random 2)))));destructive!
 
 (defun gui ()
   (setf *ballot* (shuff *ballot*))
@@ -152,7 +151,13 @@
          (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
          (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
                                      (lambda () (push (reverse *votes*) *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally))))
-         (instructions (make-instance `label :master right-frame :text "this is a detailed explaination of voting")))
+         (instructions (make-instance `label :master right-frame :text
+"Hello voter!
+Please click on the names of your favorite games in order from most to least favrite.
+As you click on more games, a list of these games, in order, will form on the right side of the application.
+If you change your mind or make a mistake, hitting \"undo vote\" will remove items from the list, most recent to most distant.
+When you are done with your list, which may be any length, please click submit \"vote\".
+Being ranked last is a higher rank than not being ranked at all.")))
     (pack top-frame)
     (pack left-frame  :side :left )
     (pack undo-vote :side :top)
@@ -160,11 +165,11 @@
     (pack instructions :side :top)
     (pack right-frame :side :right)
     (let ((len (list-length *ballot*)) (i 0))
-      (dotimes (loops (ceiling (/ len 10)))
+      (dotimes (loops (ceiling (/ len 5)))
         (let ((iframe (make-instance `frame :master left-frame)))
-          (dotimes (i 10) 
-            (when (> (list-length *ballot*) (+ i (* 10 loops)))
-              (gui-entry (nth (+ i (* 10 loops)) *ballot*) iframe right-frame))
+          (dotimes (i 5) 
+            (when (> (list-length *ballot*) (+ i (* 5 loops)))
+              (gui-entry (nth (+ i (* 5 loops)) *ballot*) iframe right-frame))
               (pack iframe :side :right)))))))
 
 (defun gui-entry (entry master right)
@@ -185,7 +190,7 @@
 (defun record-vote (team master)
   (unless (eq *votes* (pushnew team *votes*))
     (let ((vote-indicator (make-instance `label :master master :text (format nil "~a vote is for ~a~%" (nth (- (length *votes*) 1) *number-words*) (car *votes*)))))
-      (pack vote-indicator :side :bottom)(push vote-indicator *labels*)))
+      (pack vote-indicator :side :top)(push vote-indicator *labels*)))
   (format t "~%The current tally is:")
   (dolist (vote *votes*) (format t "~a~%" vote)))
 
