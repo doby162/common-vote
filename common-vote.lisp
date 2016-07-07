@@ -20,6 +20,7 @@
 (defvar *master-tally* ())
 (defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
                              "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
+(setf *random-state* (make-random-state t))
 (defvar *canidates* ()) 
 (defvar *results* ())
 (defvar *tmp* ())
@@ -138,8 +139,10 @@
   (format t "common-vote has been quickloaded"))
 ;end ballot twiddling
 ;begin gui operations
+(defun shuff (lis) (sort lis #'(lambda (x y) (eq 1 (random 2)))))
 
 (defun gui ()
+  (setf *ballot* (shuff *ballot*))
   (font-create "herb" :size 50)
   (let* ((top-frame (make-instance `frame))
          ;         (herb (font-create "herb"
