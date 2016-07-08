@@ -142,21 +142,24 @@
 
 (defun gui ()
   (setf *ballot* (shuff *ballot*))
-  (font-create "herb" :size 50)
   (let* ((top-frame (make-instance `frame))
-         ;         (herb (font-create "herb"
-         ;         (name &key family size weight slant underline overstrike)
          (left-frame (make-instance `frame :master top-frame))
          (right-frame (make-instance `frame :master top-frame))
          (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
          (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
-                                     (lambda () (push (reverse *votes*) *master-tally*) (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally))))
+                                     (unless (eq *votes* ())
+                                       (lambda () (push (reverse *votes*) *master-tally*)
+                                         (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally)))))
          (instructions (make-instance `label :master right-frame :text
 "Hello voter!
-Please click on the names of your favorite games in order from most to least favrite.
-As you click on more games, a list of these games, in order, will form on the right side of the application.
-If you change your mind or make a mistake, hitting \"undo vote\" will remove items from the list, most recent to most distant.
-When you are done with your list, which may be any length, please click submit \"vote\".
+Please click on the names of your favorite games
+in order from most to least favrite.
+As you click on more games, a list of these games,
+in order, will form on the right side of the application.
+If you change your mind or make a mistake, hitting
+\"undo vote\" will remove items from the list, most
+recent to most distant. When you are done with your
+list, which may be any length, please click submit \"vote\".
 Being ranked last is a higher rank than not being ranked at all.")))
     (pack top-frame)
     (pack left-frame  :side :left )
@@ -177,8 +180,8 @@ Being ranked last is a higher rank than not being ranked at all.")))
          (button (make-instance `button :master top :text (getf entry :name) :command
                                 (lambda () (record-vote (getf entry :team-name) right))))
          (image (make-image))
-         (canvas (make-instance `canvas :width 80 :height 50 :master top))
-         (text (make-instance `label :font "Helvetica 10 bold" :master top :text (getf entry :description))))
+         (canvas (make-instance `canvas :width 250 :height 200 :master top))
+         (text (make-instance `label :master top :text (getf entry :description))))
     (pack top :side :bottom)
     (pack button :side :top)
     (pack text :side :bottom)
