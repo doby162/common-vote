@@ -16,6 +16,7 @@
 (defvar *ballot* nil);the list of things you can vote on, possibly including a screenshot
 (defvar *votes* ())
 (defvar *labels* ())
+(defvar *vert* 3)
 (defvar *master-tally* ())
 (defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
                              "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
@@ -167,11 +168,11 @@ Being ranked last is a higher rank than not being ranked at all.")))
     (pack instructions :side :top)
     (pack right-frame :side :right)
     (let ((len (list-length *ballot*)) (i 0))
-      (dotimes (loops (ceiling (/ len 5)))
+      (dotimes (loops (ceiling (/ len *vert*)))
         (let ((iframe (make-instance `frame :master left-frame)))
-          (dotimes (i 5) 
-            (when (> (list-length *ballot*) (+ i (* 5 loops)))
-              (gui-entry (nth (+ i (* 5 loops)) *ballot*) iframe right-frame))
+          (dotimes (i *vert*) 
+            (when (> (list-length *ballot*) (+ i (* *vert* loops)))
+              (gui-entry (nth (+ i (* *vert* loops)) *ballot*) iframe right-frame))
               (pack iframe :side :right)))))))
 
 (defun gui-entry (entry master right)
