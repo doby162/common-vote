@@ -145,10 +145,9 @@
   (let* ((top-frame (make-instance `frame))
          (left-frame (make-instance `frame :master top-frame))
          (right-frame (make-instance `frame :master top-frame))
-         (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (pop *votes*) (destroy (pop *labels*)))))
+         (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (when *votes* (pop *votes*) (destroy (pop *labels*))))))
          (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
-                                     (unless (eq *votes* ())
-                                       (lambda () (push (reverse *votes*) *master-tally*)
+                                       (lambda () (when *votes* (push (reverse *votes*) *master-tally*)
                                          (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally)))))
          (instructions (make-instance `label :master right-frame :text
 "Hello voter!
