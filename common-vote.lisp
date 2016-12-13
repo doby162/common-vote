@@ -26,6 +26,10 @@
 (defvar *tmp* ())
 (defvar *low* ())
 
+
+
+
+;new code
 (defun create-vote (list-of-choices)
   (let ((data list-of-choices) (counter 0))
     (return-from create-vote
@@ -33,6 +37,14 @@
 
 (defun route-add-vote (list-of-choices)
   (push (create-vote list-of-choices) *master-tally*))
+
+(defun pop-if (vote elim)
+  (dolist (e elim)
+    (when (equal e (list-exec vote :get-top)) (list-exec vote :pop) (pop-if vote elim))))
+
+(defun elect (votes eliminated)
+  (dolist (elim eliminated) (pop-if votes elim)))
+  
 
 (defun filter (fn lst)
   (let ((acc nil))
@@ -48,7 +60,7 @@
 
 
 
-
+;new code
 
 
 
