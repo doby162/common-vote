@@ -29,10 +29,21 @@
 (defun create-vote (list-of-choices)
   (let ((data list-of-choices) (counter 0))
     (return-from create-vote
-      (list :get-top (lambda () (nth counter data)) :pop (lambda () (setf counter (+ 1 counter))) :reset (lambda () (setf counter 0))))))
+      (list :get-top (lambda () (nth counter data)) :pop (lambda () (setf counter (+ 1 counter)) (nth counter data)) :reset (lambda () (setf counter 0)(nth counter data))))))
 
 (defun route-add-vote (list-of-choices)
   (push (create-vote list-of-choices) *master-tally*))
+
+(defun filter (fn lst)
+  (let ((acc nil))
+    (dolist (x lst)
+      (let ((val (funcall fn x)))
+        (if val (push val acc)))) (nreverse acc)))
+
+(defun list-exec (ls ex &optional (n -1))
+  "takes a plist and a :property-name and executes the funcion at that location. Optionally operates on the :property of a list at nth of the given list"
+  (unless (= -1 n) (setf ls (nth n ls)))
+  (funcall (getf ls ex)))
 
 
 
