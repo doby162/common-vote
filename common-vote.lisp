@@ -25,17 +25,30 @@
 (defvar *results* ())
 (defvar *tmp* ())
 (defvar *low* ())
-(defun main ()
-  (help)
-  (loop (print (eval (read))))
-  (sb-ext:exit))
 
-(defun help() 
+(defun create-vote (list-of-choices)
+  (let ((data list-of-choices) (counter 0))
+    (return-from create-vote
+      (list :get-top (lambda () (nth counter data)) :pop (lambda () (setf counter (+ 1 counter))) :reset (lambda () (setf counter 0))))))
+
+(defun route-add-vote (list-of-choices)
+  (push (create-vote list-of-choices) *master-tally*))
+
+
+
+
+
+
+
+
+
+(defun help()
   (format t "Hello! This help function provides an overveiw of how to use common vote for your raspberry pi voting booth.~%")
   (format t "To get more data on a specific function, type (doc `name-of-function)~%")
   (format t "The functions for setup include: configure-ballot, print-ballot, clear-ballot, test, help, and incorporate~%")
   (format t "The functions for casting and counting votes include: cast-votes, count-votes~%")
   (format t "when you are done, type exit to close this program. Or just close the window it's in, doesn't matter to me.~%"))
+
 (defun count-votes (&optional how-many-winners) 
   "counts votes. Note that this function does not modify any files, so a recount can be done by re-starting this code"
   (setf *results* ())
@@ -52,7 +65,7 @@
   (when (>= (- (list-length (first *results*)) 1) (/ (list-length *master-tally*) 2))
     (display-winner)
     (return-from eliminate 0))
-  (let ((x (car (car (last *results*))))) 
+  (let ((x (car (car (last *results*)))))
 ;    (dolist (y *master-tally*) (when (equalp (first y) x) (format t "~a~%" y) (pop y) (format t "~a~%" y)))))
     (dotimes (i (list-length *master-tally*)) (when (equalp (first (nth i *master-tally*)) x) (pop (nth i *master-tally*))))) (count-votes))
 
@@ -148,7 +161,7 @@
          (right-frame (make-instance `frame :master top-frame))
          (undo-vote (make-instance `button :master right-frame :text "Undo a vote" :command (lambda () (when *votes* (pop *votes*) (destroy (pop *labels*))))))
          (commit-vote (make-instance `button :master right-frame :text "Commit your votes" :command
-                                       (lambda () (when *votes* (push (reverse *votes*) *master-tally*)
+                                       (lambda () (when *votes* (push (create-vote (reverse *votes*)) *master-tally*)
                                          (setf *votes* ()) (dolist (x *labels*) (destroy x)) (setf *labels* ()) (save-tally)))))
          (instructions (make-instance `label :master right-frame :text
 "Hello voter!
