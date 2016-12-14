@@ -42,15 +42,15 @@
   (dolist (e elim)
     (when (equal e (list-exec vote :get-top)) (list-exec vote :pop) (pop-if vote elim))))
 
-(defun elect (votes eliminated)
-  (dolist (elim eliminated) (pop-if votes elim)))
-  
+(defun count-list (ls)
+"return a plist, sorted by value, such that the key is the canidate and the value is their votecount. Also returns the total number of votes in the election")
 
-(defun filter (fn lst)
-  (let ((acc nil))
-    (dolist (x lst)
-      (let ((val (funcall fn x)))
-        (if val (push val acc)))) (nreverse acc)))
+(defun elect (votes eliminated)
+  (dolist (vote votes) (pop-if vote eliminated))
+  (let ((ls (count-list (remove nil (map 'list #'(lambda (x) (list-exec x :get-top))votes)))))
+    (when (> (nth 1 ls) (/ (last ls) 2)) (return-from elect (first ls)));write count-list and then come back to this
+  ;else
+))
 
 (defun list-exec (ls ex &optional (n -1))
   "takes a plist and a :property-name and executes the funcion at that location. Optionally operates on the :property of a list at nth of the given list"
@@ -244,7 +244,7 @@ Being ranked last is a higher rank than not being ranked at all.")))
             (gui)))
 
 ;here we have the startup proceedure
-(load-ballot);we probably always want to load this file if it exists
+;(load-ballot);we probably always want to load this file if it exists
 ;(test);automated testing!
 ;consider putting a graphical prompt to check if you would like to cast or count?
 ;(main)
