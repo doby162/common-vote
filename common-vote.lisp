@@ -43,7 +43,16 @@
     (when (equal e (list-exec vote :get-top)) (list-exec vote :pop) (pop-if vote elim))))
 
 (defun count-list (ls)
-"return a plist, sorted by value, such that the key is the canidate and the value is their votecount. Also returns the total number of votes in the election")
+  "return a plist, sorted by value, such that the key is the canidate and the value is their votecount. Also returns the total number of votes in the election"
+  (let ((ls-unique ()))
+    (dolist (l ls) (pushnew l ls-unique))
+    (let ((ret ()) (numbers ()))
+    (setf numbers (map 'list #'(lambda (x)
+                   (let ((sum 0)) (dolist (l ls) (when (eq l x) (setf sum (+ 1 sum)))) sum)) ls-unique))
+      (dotimes (i (length ls-unique)) (push (nth i ls-unique) ret) (push (nth i numbers) ret)
+        );return
+      (format t "hey~%~a" ret)
+      (return-from count-list (reverse ret)))))
 
 (defun elect (votes eliminated)
   (dolist (vote votes) (pop-if vote eliminated))
@@ -56,6 +65,16 @@
   "takes a plist and a :property-name and executes the funcion at that location. Optionally operates on the :property of a list at nth of the given list"
   (unless (= -1 n) (setf ls (nth n ls)))
   (funcall (getf ls ex)))
+
+
+;;effect state for testing
+(route-add-vote (list "a" "b" "c" "d"))
+(route-add-vote (list "a" "b" "c" "d"))
+(route-add-vote (list "a" "b" "c" "d"))
+(route-add-vote (list "b" "c" "d"))
+(route-add-vote (list "c" "d"))
+(route-add-vote (list "c" "d"))
+
 
 
 
