@@ -43,20 +43,16 @@
     (when (equal e (list-exec vote :get-top)) (list-exec vote :pop) (pop-if vote elim))))
 
 (defun count-list (ls)
-  "return a plist, sorted by value, such that the key is the canidate and the value is their votecount. Also returns the total number of votes in the election"
+  "return an alist, sorted by value, such that the key is the canidate and the value is their votecount."
   (let ((ls-unique ()))
     (dolist (l ls) (pushnew l ls-unique))
     (let ((ret ()) (numbers ()))
-    (setf numbers (map 'list #'(lambda (x)
-                   (let ((sum 0)) (dolist (l ls) (when (eq l x) (setf sum (+ 1 sum)))) sum)) ls-unique))
-      (dotimes (i (length ls-unique)) (push (nth i ls-unique) ret) (push (nth i numbers) ret)
-        );return
-      (format t "hey~%~a" ret)
-      (return-from count-list (reverse ret)))))
+      (setf numbers (mapcar #'(lambda (x) (let ((sum 0)) (dolist (l ls) (when (eq l x) (setf sum (+ 1 sum)))) sum)) ls-unique))
+      (return-from count-list (reverse (pairlis ls-unique numbers))))))
 
 (defun elect (votes eliminated)
   (dolist (vote votes) (pop-if vote eliminated))
-  (let ((ls (count-list (remove nil (map 'list #'(lambda (x) (list-exec x :get-top))votes)))))
+  (let ((ls (count-list (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes)))))
     (when (> (nth 1 ls) (/ (last ls) 2)) (return-from elect (first ls)));write count-list and then come back to this
   ;else
 ))
