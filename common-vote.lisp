@@ -1,43 +1,27 @@
 (defpackage #:common-vote
   (:use :cl)
-  (:use :ltk)
+  (:use :defrest)
   (:use :sb-ext)
-  (:export :help);
-  (:export :cast-votes);
-  (:export :count-votes);
-  (:export :clear-ballot);done
-  (:export :configure-ballot);done
-  (:export :print-ballot);done
-  (:export :test));done cross compile? built in test framework
-(in-package :common-vote);if something doesn't work, declare the package!
-;this particular macro should go in dorian utils
-(defmacro doc (function) `(documentation ,function `function))
-;global vars would go here
-(defvar *ballot* nil);the list of things you can vote on, possibly including a screenshot
-(defvar *votes* ())
-(defvar *labels* ())
-(defvar *vert* 3)
-(defvar *master-tally* ())
-(defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
-                             "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
-(setf *random-state* (make-random-state t))
-(defvar *canidates* ()) 
-(defvar *results* ())
-(defvar *tmp* ())
-(defvar *low* ())
+  (:export :test))
+(in-package :common-vote)
+(defvar *tally* ())
 
+;;;;user-level functions
+(defun elect (votes eliminated)
+  (dolist (vote votes) (pop-if vote eliminated))
+  (let ((ls (count-list (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes)))))
+    (visual ls)
+    (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
+      (return-from elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
+    (elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated))))
 
+;;;;API-level functions
 
-
-;new code
-
+;;;;support functions
 (defun create-vote (list-of-choices)
   (let ((data list-of-choices) (counter 0))
     (return-from create-vote
-      (list :get-top (lambda () (nth counter data)) :pop (lambda () (setf counter (+ 1 counter)) (nth counter data)) :reset (lambda () (setf counter 0)(nth counter data))))))
-
-(defun route-add-vote (list-of-choices)
-  (push (create-vote list-of-choices) *master-tally*))
+		 (list :get-top (lambda () (nth counter data)) :pop (lambda () (setf counter (+ 1 counter)) (nth counter data)) :reset (lambda () (setf counter 0)(nth counter data))))))
 
 (defun pop-if (vote elim)
   (dolist (e elim)
@@ -49,27 +33,23 @@
     (dolist (l ls) (pushnew l ls-unique))
     (let ((ret ()) (numbers ()))
       (setf numbers (mapcar #'(lambda (x) (let ((sum 0)) (dolist (l ls) (when (eq l x) (setf sum (+ 1 sum)))) sum)) ls-unique))
-      (return-from count-list (reverse (pairlis ls-unique numbers))))))
 
-(defun elect (votes eliminated)
-  (dolist (vote votes) (pop-if vote eliminated))
-  (let ((ls (count-list (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes)))))
-    (visual ls)
-    (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
-      (return-from elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
-    (elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated))))
+      (return-from count-list (reverse (pairlis ls-unique numbers))))))
+(defun route-add-vote (list-of-choices)
+  (push (create-vote list-of-choices) *tally*))
 
 (defun visual (lis)
   (let ((str "####################################################################################################"))
     (dolist (ls lis) (format t "~a:~a~%" (car ls) (subseq str 0 (cdr ls)))))
-  (format t "~%")) 
+  (format t "~%"))
 
+;;;;promising utilities
 (defun list-exec (ls ex &optional (n -1))
   "takes a plist and a :property-name and executes the funcion at that location. Optionally operates on the :property of a list at nth of the given list"
   (unless (= -1 n) (setf ls (nth n ls)))
   (funcall (getf ls ex)))
 
-
+;;;;test suit
 ;;effect state for testing
 (route-add-vote (list "a" "b" "c" "d"))
 (route-add-vote (list "a" "b" "c" "d"))
@@ -79,13 +59,18 @@
 (route-add-vote (list "c" "d"))
 (route-add-vote (list "c" "d"))
 
-
-
-
-
-;new code
-
-
+;;;;legacy
+(defvar *ballot* nil);the list of things you can vote on, possibly including a screenshot
+(defvar *votes* ())
+(defvar *labels* ())
+(defvar *vert* 3)
+(defvar *number-words* (list "First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Seventh" "Eighth" "Ninth" "Tenth" "Eleventh" "Twelth" "Thirteenth"
+                             "Fourteenth" "Fifteenth" "Sixteenth" "Seventeeth" "Eighteenth" "Nineteeth" "Twentyith" "Twenty-First" "Twenty-second"))
+(setf *random-state* (make-random-state t))
+(defvar *canidates* ()) 
+(defvar *results* ())
+(defvar *tmp* ())
+(defvar *low* ())
 
 
 (defun help()
