@@ -56,11 +56,12 @@
   (let ((ls (count-list (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes)))))
     (visual ls)
     (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
-      (return-from elect (rassoc (reduce #'max (mapcar #'cdr ls)) ls)))
+      (return-from elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
     (elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated))))
 
 (defun visual (lis)
-  (dolist (ls lis) (format t "~a~%" ls))
+  (let ((str "####################################################################################################"))
+    (dolist (ls lis) (format t "~a:~a~%" (car ls) (subseq str 0 (cdr ls)))))
   (format t "~%")) 
 
 (defun list-exec (ls ex &optional (n -1))
