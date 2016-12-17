@@ -54,9 +54,14 @@
 (defun elect (votes eliminated)
   (dolist (vote votes) (pop-if vote eliminated))
   (let ((ls (count-list (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes)))))
+    (visual ls)
     (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
       (return-from elect (rassoc (reduce #'max (mapcar #'cdr ls)) ls)))
     (elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated))))
+
+(defun visual (lis)
+  (dolist (ls lis) (format t "~a~%" ls))
+  (format t "~%")) 
 
 (defun list-exec (ls ex &optional (n -1))
   "takes a plist and a :property-name and executes the funcion at that location. Optionally operates on the :property of a list at nth of the given list"
@@ -69,6 +74,7 @@
 (route-add-vote (list "a" "b" "c" "d"))
 (route-add-vote (list "a" "b" "c" "d"))
 (route-add-vote (list "b" "c" "d"))
+(route-add-vote (list "c" "d"))
 (route-add-vote (list "c" "d"))
 (route-add-vote (list "c" "d"))
 
