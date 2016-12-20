@@ -3,24 +3,30 @@
   (:use :defrest)
   (:use :sb-ext)
   (:export :run)
-  (:export :elect)
   (:export :test))
 (in-package :common-vote)
 (defvar *tally* ());all votes
 (defvar *dispatch-table* (list (create-rest-table-dispatcher)));all routes
+(defvar *cans* ())
 
 ;;;;user-level functions
-(defun elect (votes eliminated)
-  (dolist (vote votes) (pop-if vote eliminated))
-  (let ((ls (count-list (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes)))))
-    (visual ls)
-    (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
-      (return-from elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
-    (elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated))))
-(defun run ())
+(defun run () (reset-votes *tally*) (elect *tally*))
 ;;;;API-level functions
 ;;get the ui
-(defrest:defrest "/hello" :GET () "hello world!")
+(defrest:defrest "/vote" :GET ()"
+		 <p>vote plz</p>
+		 <input type='button' value='yis'>
+		 ")
+
+(defrest:defrest "/signup" :GET ()"
+		 <form method='post'>
+		 <input type='text' name='signup' value='Your team name here'>
+		 <input type='submit'>
+		 </form>
+		 ")
+(defrest:defrest "/signup" :POST ()
+		 (pushnew (hunchentoot:post-parameter "signup") *cans*)
+		 (concatenate 'string "<p>Thanks a bunch " (hunchentoot:post-parameter "signup") "!</p>"))
 
 ;;post the vote
 
@@ -29,6 +35,17 @@
 (push (create-rest-table-dispatcher) hunchentoot:*dispatch-table*)
 
 ;;;;support functions
+(defun elect (votes eliminated)
+  (dolist (vote votes) (pop-if vote eliminated))
+  (let ((ls (count-list (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes)))))
+    (visual ls)
+    (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
+      (return-from elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
+    (elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated))))
+
+(defun reset-votes (votes) 
+  (dolist (vote votes) (list-exec vote :reset)))
+
 (defun create-vote (list-of-choices)
   (let ((data list-of-choices) (counter 0))
     (return-from create-vote
@@ -42,10 +59,11 @@
   "return an alist, sorted by value, such that the key is the canidate and the value is their votecount."
   (let ((ls-unique ()))
     (dolist (l ls) (pushnew l ls-unique))
-    (let ((ret ()) (numbers ()))
+    (let ((numbers ()))
       (setf numbers (mapcar #'(lambda (x) (let ((sum 0)) (dolist (l ls) (when (eq l x) (setf sum (+ 1 sum)))) sum)) ls-unique))
 
       (return-from count-list (reverse (pairlis ls-unique numbers))))))
+
 (defun route-add-vote (list-of-choices)
   (push (create-vote list-of-choices) *tally*))
 
@@ -70,3 +88,8 @@
 (route-add-vote (list "c" "d"))
 (route-add-vote (list "c" "d"))
 (route-add-vote (list "c" "d"))
+(push "a" *cans*)
+(push "b" *cans*)
+(push "c" *cans*)
+(push "d" *cans*)
+(push "e" *cans*)
