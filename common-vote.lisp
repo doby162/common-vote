@@ -13,10 +13,9 @@
 (defun run () (reset-votes *tally*) (elect *tally*))
 ;;;;API-level functions
 ;;get the ui
-(defrest:defrest "/vote" :GET ()"
-		 <p>vote plz</p>
-		 <input type='button' value='yis'>
-		 ")
+(defrest:defrest "/vote" :GET ()
+  (let ((resp "<p>Plz 2 vot</p>"))
+  (dolist (can *cans*) (setf resp (concatenate 'string resp (format nil "<input type='button' value='~a'>" can)))) resp))
 
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
@@ -79,17 +78,17 @@
   (funcall (getf ls ex)))
 
 ;;;;test suit
-(defun test ())
-;;effect state for testing
-(route-add-vote (list "a" "b" "c" "d"))
-(route-add-vote (list "a" "b" "c" "d"))
-(route-add-vote (list "a" "b" "c" "d"))
-(route-add-vote (list "b" "c" "d"))
-(route-add-vote (list "c" "d"))
-(route-add-vote (list "c" "d"))
-(route-add-vote (list "c" "d"))
-(push "a" *cans*)
-(push "b" *cans*)
-(push "c" *cans*)
-(push "d" *cans*)
-(push "e" *cans*)
+(defun test ()
+  ;;effect state for testing
+  (route-add-vote (list "a" "b" "c" "d"))
+  (route-add-vote (list "a" "b" "c" "d"))
+  (route-add-vote (list "a" "b" "c" "d"))
+  (route-add-vote (list "b" "c" "d"))
+  (route-add-vote (list "c" "d"))
+  (route-add-vote (list "c" "d"))
+  (route-add-vote (list "c" "d"))
+  (push "a" *cans*)
+  (push "b" *cans*)
+  (push "c" *cans*)
+  (push "d" *cans*)
+  (push "e" *cans*))
