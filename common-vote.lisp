@@ -14,12 +14,14 @@
 ;;;;API-level functions
 ;;get the ui
 (defrest:defrest "/vote" :GET ()
-  (let ((resp "<p>Plz 2 vot</p>"))
+  (let ((resp (format nil "<p>Plz 2 vot</p> <p><form method='get' action='commit'><input type='hidden' name='vote' value='~a'><input type='submit' value='Submit your vote'></form></p>" (hunchentoot:get-parameter "vote"))))
     (dolist (can *cans*) (setf resp (concatenate 'string resp (format nil
-      "<p><form method='get'><input name='vote' type='submit' value='~a,~a'></form></p>" (hunchentoot:get-parameter "vote") can)))) resp))
+      "<p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form></p>" (or (hunchentoot:get-parameter "vote") "") can)))) resp))
 
-(defrest:defrest "/vote" :POST ();this wont work yet
-  (route-add-vote (hunchentoot:post-parameter "signup")))
+(defun parse ())
+
+(defrest:defrest "/commit" :GET ();this wont work yet
+  (route-add-vote (parse (hunchentoot:post-parameter "signup"))))
 
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
