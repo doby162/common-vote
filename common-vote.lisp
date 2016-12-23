@@ -15,7 +15,11 @@
 ;;get the ui
 (defrest:defrest "/vote" :GET ()
   (let ((resp "<p>Plz 2 vot</p>"))
-  (dolist (can *cans*) (setf resp (concatenate 'string resp (format nil "<input type='button' value='~a'>" can)))) resp))
+    (dolist (can *cans*) (setf resp (concatenate 'string resp (format nil
+      "<p><form method='get'><input name='vote' type='submit' value='~a,~a'></form></p>" (hunchentoot:get-parameter "vote") can)))) resp))
+
+(defrest:defrest "/vote" :POST ();this wont work yet
+  (route-add-vote (hunchentoot:post-parameter "signup")))
 
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
