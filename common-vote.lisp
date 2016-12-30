@@ -15,10 +15,10 @@
 ;;get the ui
 (defrest:defrest "/vote" :GET ()
   (let ((resp (format nil "<p>Plz 2 vot</p> <p><form method='get' action='commit'><input type='hidden' name='vote' value='~a'><input type='submit' value='Submit your vote'></form></p>" (hunchentoot:get-parameter "vote"))))
-    (dolist (can *cans*) (setf resp (concatenate 'string resp (format nil
-      "<p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form></p>" (or (hunchentoot:get-parameter "vote") "") can)))) resp))
+    (dolist (can *cans*) (unless (search can (hunchentoot:get-parameter "vote")) (setf resp (concatenate 'string resp (format nil
+      "<p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form></p>" (or (hunchentoot:get-parameter "vote") "") can))))) resp))
 
-(defun parse ())
+(defun parse (a))
 
 (defrest:defrest "/commit" :GET ();this wont work yet
   (route-add-vote (parse (hunchentoot:post-parameter "signup"))))
