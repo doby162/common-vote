@@ -10,7 +10,7 @@
 (defvar *cans* ())
 
 ;;;;user-level functions
-(defun run () (reset-votes *tally*) (elect *tally*))
+(defun run () (reset-votes *tally*) (elect *tally* ()))
 ;;;;API-level functions
 ;;get the ui
 (defrest:defrest "/vote" :GET ()
@@ -18,10 +18,9 @@
     (dolist (can *cans*) (unless (search can (hunchentoot:get-parameter "vote")) (setf resp (concatenate 'string resp (format nil
       "<p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form></p>" (or (hunchentoot:get-parameter "vote") "") can))))) resp))
 
-(defun parse (a))
-
 (defrest:defrest "/commit" :GET ();this wont work yet
-  (route-add-vote (parse (hunchentoot:post-parameter "signup"))))
+  (route-add-vote (parse (hunchentoot:get-parameter "vote")))
+"hey")
 
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
@@ -48,13 +47,16 @@
       (return-from elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
     (elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated))))
 
+(defun parse (a)
+  (split-by #\, (string-trim "," a)))
+
 (defun reset-votes (votes) 
   (dolist (vote votes) (list-exec vote :reset)))
 
 (defun create-vote (list-of-choices)
   (let ((data list-of-choices) (counter 0))
     (return-from create-vote
-		 (list :get-top (lambda () (nth counter data)) :pop (lambda () (setf counter (+ 1 counter)) (nth counter data)) :reset (lambda () (setf counter 0)(nth counter data))))))
+		 (list :get-top (lambda () (string-trim " " (nth counter data))) :pop (lambda () (setf counter (+ 1 counter)) (nth counter data)) :reset (lambda () (setf counter 0)(nth counter data))))))
 
 (defun pop-if (vote elim)
   (dolist (e elim)
@@ -63,9 +65,9 @@
 (defun count-list (ls)
   "return an alist, sorted by value, such that the key is the canidate and the value is their votecount."
   (let ((ls-unique ()))
-    (dolist (l ls) (pushnew l ls-unique))
+    (dolist (l ls) (pushnew l ls-unique :test #'equalp))
     (let ((numbers ()))
-      (setf numbers (mapcar #'(lambda (x) (let ((sum 0)) (dolist (l ls) (when (eq l x) (setf sum (+ 1 sum)))) sum)) ls-unique))
+      (setf numbers (mapcar #'(lambda (x) (let ((sum 0)) (dolist (l ls) (when (equalp l x) (setf sum (+ 1 sum)))) sum)) ls-unique))
 
       (return-from count-list (reverse (pairlis ls-unique numbers))))))
 
@@ -82,6 +84,12 @@
   "takes a plist and a :property-name and executes the funcion at that location. Optionally operates on the :property of a list at nth of the given list"
   (unless (= -1 n) (setf ls (nth n ls)))
   (funcall (getf ls ex)))
+
+(defun split-by (char string);make general
+    (loop for i = 0 then (1+ j)
+          as j = (position #\, string :start i)
+          collect (subseq string i j)
+          while j))
 
 ;;;;test suit
 (defun test ()
