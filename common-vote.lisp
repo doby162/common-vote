@@ -20,7 +20,16 @@
 
 (defrest:defrest "/commit" :GET ();this wont work yet
   (route-add-vote (parse (hunchentoot:get-parameter "vote")))
-"hey")
+"<html>
+<head>
+</head>
+
+<script type='text/javascript'>
+window.location.href = 'http://localhost:8080/vote'
+</script>
+
+<body><p>hey</p></body>
+")
 
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
