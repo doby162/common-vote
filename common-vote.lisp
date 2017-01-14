@@ -8,6 +8,7 @@
 (defvar *tally* ());all votes
 (defvar *dispatch-table* (list (create-rest-table-dispatcher)));all routes
 (defvar *cans* ())
+(defvar *imgs* ())
 
 ;;;;user-level functions
 (defun run () (reset-votes *tally*) (elect *tally* ()))
@@ -16,7 +17,7 @@
 (defrest:defrest "/vote" :GET ()
   (let ((resp (format nil "<p>Plz 2 vot</p> <p><form method='get' action='commit'><input type='hidden' name='vote' value='~a'><input type='submit' value='Submit your vote'></form></p>" (hunchentoot:get-parameter "vote"))))
     (dolist (can *cans*) (unless (search can (hunchentoot:get-parameter "vote")) (setf resp (concatenate 'string resp (format nil
-      "<p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form></p>" (or (hunchentoot:get-parameter "vote") "") can))))) resp))
+      "<p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form> <image width='200' height='200' src='~a'></p>" (or (hunchentoot:get-parameter "vote") "") can (cdr (assoc can *imgs* :test #'equalp))))))) resp))
 
 (defrest:defrest "/save" :GET ()
   (route-add-vote (parse (hunchentoot:get-parameter "vote")))
@@ -61,11 +62,13 @@ window.location.href = 'http://xkcd.com/vote'
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
 		 <input type='text' name='signup' value='Your team name here'>
+		 <input type='text' name='image' value='Image link here'>
 		 <input type='submit'>
 		 </form>
 		 ")
 (defrest:defrest "/signup" :POST ()
 		 (pushnew (hunchentoot:post-parameter "signup") *cans*)
+		 (pushnew (cons (hunchentoot:post-parameter "signup") (hunchentoot:post-parameter "image")) *imgs*)
 		 (concatenate 'string "<p>Thanks a bunch " (hunchentoot:post-parameter "signup") "!</p>"))
 
 ;;post the vote
