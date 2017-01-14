@@ -18,18 +18,45 @@
     (dolist (can *cans*) (unless (search can (hunchentoot:get-parameter "vote")) (setf resp (concatenate 'string resp (format nil
       "<p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form></p>" (or (hunchentoot:get-parameter "vote") "") can))))) resp))
 
-(defrest:defrest "/commit" :GET ();this wont work yet
+(defrest:defrest "/save" :GET ()
   (route-add-vote (parse (hunchentoot:get-parameter "vote")))
+  (format nil "~a" (parse (hunchentoot:get-parameter "vote"))))
+;"<html>
+;<head>
+;</head>
+
+;<script type='text/javascript'>
+;//window.location.href = 'http://localhost:8080/vote'
+;</script>
+;
+;<body><p>hey</p>
+;
+;</body>
+;" )
+
+(defrest:defrest "/commit" :GET ()
+(format nil
 "<html>
 <head>
 </head>
 
-<script type='text/javascript'>
-window.location.href = 'http://localhost:8080/vote'
+<script>
+
+var r = confirm('Press a button!\nEither OK or Cancel.\nThe button you pressed will be displayed in the result window.');
+    if (r == true) {
+    txt = 'You pressed OK!';
+window.location.href = 'http://localhost:8080/save?vote=~a'
+    } else {
+    txt = 'You pressed Cancel!';
+window.location.href = 'http://xkcd.com/vote'
+    }
+
+
 </script>
 
-<body><p>hey</p></body>
-")
+<body><p>confirm</p></body>
+"
+(hunchentoot:get-parameter "vote")))
 
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
@@ -84,7 +111,7 @@ window.location.href = 'http://localhost:8080/vote'
   (push (create-vote list-of-choices) *tally*))
 
 (defun visual (lis)
-  (let ((str "####################################################################################################"))
+  (let ((str "########################################################################################################################################################################################################"))
     (dolist (ls lis) (format t "~a:~a~%" (car ls) (subseq str 0 (cdr ls)))))
   (format t "~%"))
 
