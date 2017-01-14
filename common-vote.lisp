@@ -60,6 +60,8 @@ window.location.href = 'http://xkcd.com/vote'
 		 (pushnew (cons (hunchentoot:post-parameter "signup") (hunchentoot:post-parameter "image")) *imgs*)
 		 (concatenate 'string "<p>Thanks a bunch " (hunchentoot:post-parameter "signup") "!</p>"))
 
+(defrest:defrest "/run" :GET () (format nil "~a is the winner!" (run)))
+
 ;;post the vote
 
 ;;book keeping
