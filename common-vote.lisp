@@ -20,7 +20,7 @@
 
 (defrest:defrest "/save" :GET ()
   (route-add-vote (parse (hunchentoot:get-parameter "vote")))
-  (format nil "~a" (parse (hunchentoot:get-parameter "vote"))))
+  (format nil "~a <script type='text/javascript'> window.location.href = 'http://localhost:8080/vote' </script>" (parse (hunchentoot:get-parameter "vote"))))
 ;"<html>
 ;<head>
 ;</head>
@@ -77,7 +77,7 @@ window.location.href = 'http://xkcd.com/vote'
 ;;;;support functions
 (defun elect (votes eliminated)
   (dolist (vote votes) (pop-if vote eliminated))
-  (let ((ls (count-list (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes)))))
+  (let ((ls (count-list (remove-if #'(lambda (x) (equalp x "NIL")) (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes))))))
     (visual ls)
     (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
       (return-from elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
