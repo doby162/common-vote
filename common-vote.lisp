@@ -21,19 +21,8 @@
 
 (defrest:defrest "/save" :GET ()
   (route-add-vote (parse (hunchentoot:get-parameter "vote")))
-  (format nil "~a <script type='text/javascript'> window.location.href = 'http://localhost:8080/vote' </script>" (parse (hunchentoot:get-parameter "vote"))))
-;"<html>
-;<head>
-;</head>
-
-;<script type='text/javascript'>
-;//window.location.href = 'http://localhost:8080/vote'
-;</script>
-;
-;<body><p>hey</p>
-;
-;</body>
-;" )
+  (format nil "<img src='http://www.commentsdb.com/wp-content/uploads/2015/07/Congratulations-You-Did-It-Graphic.jpg'> <script type='text/javascript'>
+          setTimeout(function(){window.location.href = 'http://localhost:8080/vote';}, 6000); </script>"))
 
 (defrest:defrest "/commit" :GET ()
 (format nil
