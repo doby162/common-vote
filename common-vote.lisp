@@ -16,9 +16,9 @@
 ;;;;API-level functions
 ;;get the ui
 (defrest:defrest "/vote" :GET ()
-  (let ((resp (format nil "<p>Plz 2 vot</p> <p><form method='get' action='commit'><input type='hidden' name='vote' value='~a'><input type='submit' value='Submit your vote'></form></p>" (hunchentoot:get-parameter "vote"))))
+  (let ((resp (format nil "<p>Please select your favorite game of the available choices</p><p>Use your browser\'s back button to remove a game from you vote</p> <p><form method='get' action='commit'><input type='hidden' name='vote' value='~a'><input type='submit' value='Submit your vote'></form></p>" (hunchentoot:get-parameter "vote"))))
     (dolist (can *cans*) (unless (search can (hunchentoot:get-parameter "vote")) (setf resp (concatenate 'string resp (format nil
-      "<div ALIGN=~a><p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form> <image width='200' height='200' src='~a'></p></div"
+      "<div style='background:~a'><p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form> <image width='200' height='200' src='~a'></p></div>"
       (align)(or (hunchentoot:get-parameter "vote") "") can (cdr (assoc can *imgs* :test #'equalp))))))) resp))
 
 (defrest:defrest "/save" :GET ()
@@ -34,13 +34,13 @@
 
 <script>
 
-var r = confirm('Press a button!\nEither OK or Cancel.\nThe button you pressed will be displayed in the result window.');
+var r = confirm('You have chosen to vote for the following teams: ~a in that order. Is this correct?');
     if (r == true) {
     txt = 'You pressed OK!';
 window.location.href = 'http://localhost:8080/save?vote=~a'
     } else {
     txt = 'You pressed Cancel!';
-window.location.href = 'http://xkcd.com/vote'
+window.location.href = 'http://localhost:8080/vote?vote=~a'
     }
 
 
@@ -48,7 +48,7 @@ window.location.href = 'http://xkcd.com/vote'
 
 <body><p>confirm</p></body>
 "
-(hunchentoot:get-parameter "vote")))
+(hunchentoot:get-parameter "vote")(hunchentoot:get-parameter "vote")(hunchentoot:get-parameter "vote")))
 
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
@@ -113,7 +113,7 @@ window.location.href = 'http://xkcd.com/vote'
 
 (defun align ()
   (setf *int* (+ *int* 1))
-  (nth (mod *int* 2) '("LEFT" "CENTER")))
+  (nth (mod *int* 2) '("white" "grey")))
 
 ;;;;promising utilities
 (defun list-exec (ls ex &optional (n -1))
@@ -138,10 +138,15 @@ window.location.href = 'http://xkcd.com/vote'
   (route-add-vote (list "c" "d"))
   (route-add-vote (list "c" "d"))
   (push "a" *cans*)
+  (pushnew (cons "a" "http://imgs.xkcd.com/comics/trash.png") *imgs*)
   (push "b" *cans*)
+  (pushnew (cons "b" "http://imgs.xkcd.com/comics/time_capsule.png") *imgs*)
   (push "c" *cans*)
+  (pushnew (cons "c" "http://imgs.xkcd.com/comics/feathers.png") *imgs*)
   (push "d" *cans*)
+  (pushnew (cons "d" "http://imgs.xkcd.com/comics/nostalgia.png") *imgs*)
   (push "e" *cans*)
+  (pushnew (cons "e" "http://imgs.xkcd.com/comics/fermirotica.png") *imgs*)
   (assert (equalp (run) "c"))
   (route-add-vote (list "a"))
   (run)
