@@ -28,7 +28,7 @@
 (defrest:defrest "/save" :GET ()
   (route-add-vote (parse (hunchentoot:get-parameter "vote")))
   (format nil "<img src='http://www.commentsdb.com/wp-content/uploads/2015/07/Congratulations-You-Did-It-Graphic.jpg'> <script type='text/javascript'>
-          setTimeout(function(){window.location.href = 'http://localhost:8080/vote';}, 6000); </script>"))
+          setTimeout(function(){window.location.href = '/vote';}, 6000); </script>"))
 
 (defrest:defrest "/commit" :GET ()
 (format nil
@@ -41,10 +41,10 @@
 var r = confirm('You have chosen to vote for the following teams: ~a in that order. Is this correct?');
     if (r == true) {
     txt = 'You pressed OK!';
-window.location.href = 'http://localhost:8080/save?vote=~a'
+window.location.href = '/save?vote=~a'
     } else {
     txt = 'You pressed Cancel!';
-window.location.href = 'http://localhost:8080/vote?vote=~a'
+window.location.href = '/vote?vote=~a'
     }
 
 
