@@ -16,10 +16,14 @@
 ;;;;API-level functions
 ;;get the ui
 (defrest:defrest "/vote" :GET ()
-  (let ((resp (format nil "<p>Please select your favorite game of the available choices</p><h2>You may rank as many games as you like, in order from most to least favourite.</h2><p>Use your browser\'s back button to remove a game from you vote</p> <p><form method='get' action='commit'><input type='hidden' name='vote' value='~a'><input type='submit' value='Submit your vote'></form></p>" (hunchentoot:get-parameter "vote"))))
+  (let ((resp (format nil "<p>Please select your favorite game of the available choices</p><h2>You may rank as many games as you like, in order from most to least favourite.</h2>
+                      <p>Currently, you have selected ~a as your choices, in that order</p>
+                      <p>Use your browser\'s back button to remove a game from you vote</p>
+                      <p><form method='get' action='commit'><input type='hidden' name='vote' value='~a'><input type='submit' value='Submit your vote'></form></p>"
+                      (hunchentoot:get-parameter "vote")(hunchentoot:get-parameter "vote"))))
     (dolist (can *cans*) (unless (search can (hunchentoot:get-parameter "vote")) (setf resp (concatenate 'string resp (format nil
-      "<hr></hr><div><p><form method='get'><input name='vote' type='submit' value='~a ~a,'></form> <image width='200' height='200' src='~a'></p></div>"
-      (or (hunchentoot:get-parameter "vote") "") can (cdr (assoc can *imgs* :test #'equalp))))))) resp))
+      "<hr></hr><div><p><form method='get'><input name='vote' type='hidden' value='~a ~a,'><input name='last' type='submit' value='~a'></form><image width='200' height='200' src='~a'></p></div>"
+      (or (hunchentoot:get-parameter "vote") "") can can (cdr (assoc can *imgs* :test #'equalp))))))) resp))
 
 (defrest:defrest "/save" :GET ()
   (route-add-vote (parse (hunchentoot:get-parameter "vote")))
@@ -152,3 +156,6 @@ window.location.href = 'http://localhost:8080/vote?vote=~a'
   (run)
   (assert (equalp (run) "a"))
   (setf *tally* ()))
+
+
+;(test)
