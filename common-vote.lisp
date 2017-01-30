@@ -71,7 +71,7 @@ window.location.href = '/vote?vote=~a'
 ;;post the vote
 
 ;;book keeping
-(defvar *server* (defrest:start (make-instance 'defrest:easy-acceptor :port 8080)))
+(defvar *server* (defrest:start (make-instance 'defrest:easy-acceptor :port 8182)))
 (push (create-rest-table-dispatcher) hunchentoot:*dispatch-table*)
 
 ;;;;support functions
