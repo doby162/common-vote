@@ -20,7 +20,7 @@
                       <p>Currently, you have selected ~a as your choices, in that order</p>
                       <p>Use your browser\'s back button to remove a game from you vote</p>
                       <p><form method='get' action='commit'><input type='hidden' name='vote' value='~a'><input type='submit' value='Submit your vote'></form></p>"
-                      (hunchentoot:get-parameter "vote")(hunchentoot:get-parameter "vote"))))
+                      (html-list (hunchentoot:get-parameter "vote"))(hunchentoot:get-parameter "vote"))))
     (dolist (can *cans*) (unless (search can (hunchentoot:get-parameter "vote")) (setf resp (concatenate 'string resp (format nil
       "<hr></hr><div><p><form method='get'><input name='vote' type='hidden' value='~a ~a,'><input name='last' type='submit' value='~a'></form><image width='200' height='200' src='~a'></p></div>"
       (or (hunchentoot:get-parameter "vote") "") can can (cdr (assoc can *imgs* :test #'equalp))))))) resp))
@@ -91,6 +91,10 @@ window.location.href = '/vote?vote=~a'
 
 (defun parse (a)
   (split-by #\, (string-trim "," a)))
+
+(defun html-list (a)
+  (let ((b ""))
+    (dolist (ls (parse a)) (setf b (concatenate 'string b (format nil "<br>~a<br>" ls))))b))
 
 (defun reset-votes (votes) 
   (dolist (vote votes) (list-exec vote :reset)))
