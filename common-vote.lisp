@@ -26,9 +26,12 @@
       (or (hunchentoot:get-parameter "vote") "") can can (cdr (assoc can *imgs* :test #'equalp))))))) resp))
 
 (defrest:defrest "/save" :GET ()
-  (route-add-vote (parse (hunchentoot:get-parameter "vote")))
   (format nil "<img src='http://www.commentsdb.com/wp-content/uploads/2015/07/Congratulations-You-Did-It-Graphic.jpg'> <script type='text/javascript'>
           setTimeout(function(){window.location.href = '/vote';}, 6000); </script>"))
+
+(defrest:defrest "/sav" :GET ()
+  (route-add-vote (parse (hunchentoot:get-parameter "vote")))
+  (format nil "<script type='text/javascript'> window.location.href = '/vote';</script>"))
 
 (defrest:defrest "/commit" :GET ()
 (format nil
@@ -41,7 +44,7 @@
 var r = confirm('You have chosen to vote for the following teams: ~a in that order. Is this correct?');
     if (r == true) {
     txt = 'You pressed OK!';
-window.location.href = '/save?vote=~a'
+window.location.href = '/sav?vote=~a'
     } else {
     txt = 'You pressed Cancel!';
 window.location.href = '/vote?vote=~a'
