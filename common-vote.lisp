@@ -27,11 +27,11 @@
 
 (defrest:defrest "/save" :GET ()
   (format nil "<img src='http://www.commentsdb.com/wp-content/uploads/2015/07/Congratulations-You-Did-It-Graphic.jpg'> <script type='text/javascript'>
-          setTimeout(function(){window.location.href = '/vote';}, 6000); </script>"))
+          setTimeout(function(){window.location.href = '/vote';}, 5000); </script>"))
 
 (defrest:defrest "/sav" :GET ()
   (route-add-vote (parse (hunchentoot:get-parameter "vote")))
-  (format nil "<script type='text/javascript'> window.location.href = '/vote';</script>"))
+  (format nil "<script type='text/javascript'> window.location.href = '/save';</script>"))
 
 (defrest:defrest "/commit" :GET ()
 (format nil
@@ -59,7 +59,8 @@ window.location.href = '/vote?vote=~a'
 
 (defrest:defrest "/signup" :GET ()"
 		 <form method='post'>
-		 <input type='text' name='signup' value='Your team name here'>
+		 <p>Screenshot for your game * We suggest using one that showcases familiar gameplay or recognizable characters, instead of title screens or logos. * Use a direct, public image link - for example [http://i.imgur.com/b3yD9SR.png]</p>
+		 <input type='text' name='signup' value='Team name : Game name'>
 		 <input type='text' name='image' value='Image link here'>
 		 <input type='submit'>
 		 </form>
@@ -69,7 +70,7 @@ window.location.href = '/vote?vote=~a'
 		 (pushnew (cons (hunchentoot:post-parameter "signup") (hunchentoot:post-parameter "image")) *imgs*)
 		 (concatenate 'string "<p>Thanks a bunch " (hunchentoot:post-parameter "signup") "!</p>"))
 
-(defrest:defrest "/run" :GET () (format nil "~a is the winner!" (run)))
+(defrest:defrest "/run" :GET () (format nil "<p>~a is the winner!</p>" (run)))
 
 ;;post the vote
 
@@ -88,6 +89,14 @@ window.location.href = '/vote?vote=~a'
     (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
       (return-from elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
     (elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated))))
+
+(defun html-elect (votes eliminated str)
+  (dolist (vote votes) (pop-if vote eliminated))
+  (let ((ls (count-list (remove-if #'(lambda (x) (equalp x "NIL")) (remove nil (mapcar #'(lambda (x) (list-exec x :get-top))votes))))))
+    (setf str (concatenate 'string str (html-visual ls)))
+    (when (>= (reduce #'max (mapcar #'cdr ls)) (/ (reduce #'+ (mapcar #'cdr ls)) 2))
+      (return-from html-elect (car (rassoc (reduce #'max (mapcar #'cdr ls)) ls))))
+    (html-elect votes (push (car (rassoc (reduce #'min (mapcar #'cdr ls)) ls)) eliminated) str)str))
 
 (defun parse (a)
   (split-by #\, (string-trim "," a)))
@@ -124,6 +133,11 @@ window.location.href = '/vote?vote=~a'
   (let ((str "########################################################################################################################################################################################################"))
     (dolist (ls lis) (format t "~a:~a~%" (car ls) (subseq str 0 (cdr ls)))))
   (format t "~%"))
+
+(defun html-visual (lis)
+  (let ((str "########################################################################################################################################################################################################")(blank "")) 
+   (dolist (ls lis) (setf blank (concatenate 'string blank (format nil "~a:~a~%" (car ls) (subseq str 0 (cdr ls))))))
+  (setf blank (concatenate 'string blank (format nil "~%")))blank))
 
 (defun align ()
   (setf *int* (+ *int* 1))
